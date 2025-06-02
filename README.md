@@ -9,11 +9,7 @@
 - Git
 
 ### Installation Steps
-1. Clone the repository
-```bash
-git clone <repository-url>
-cd api_transaksi
-```
+1. unzip  folder yang telah didownload
 
 2. Install dependencies
 ```bash
