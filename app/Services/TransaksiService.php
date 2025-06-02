@@ -101,7 +101,7 @@ class TransaksiService
                     } elseif ($cat === 'Revenue') {
                         $value = $monthData ? number_format($monthData->revenue, 2, '.', '') : 0;
                     } else { // Income
-                        $value = $monthData ? number_format($monthData->revenue - ($monthData->revenue * 0.1), 2, '.', '') : 0; // Assuming income is revenue minus 10% tax
+                        $value = $monthData ? number_format($monthData->income , 2, '.', '') : 0;
                     }
 
                     $catData['data'][] = [

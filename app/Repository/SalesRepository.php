@@ -58,6 +58,7 @@ class SalesRepository
                 DB::raw('MONTH(sales_orders.created_at) as month'),
                 DB::raw('SUM(sales_targets.amount) as target'),
                 DB::raw('SUM(sales_order_items.quantity * sales_order_items.selling_price) as revenue'),
+                DB::raw('SUM(sales_order_items.quantity * (sales_order_items.selling_price - sales_order_items.production_price)) as income'),
                 DB::raw('COUNT(DISTINCT sales_orders.id) as total_transactions')
             )
             ->groupBy('month')
