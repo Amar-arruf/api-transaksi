@@ -25,5 +25,12 @@ WORKDIR /var/www/html
 # Copy existing application directory contents
 COPY . /var/www/html
 
+# Create a user with the same UID as your host user
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+
+RUN groupadd -g ${GROUP_ID} appuser && \
+    useradd -u ${USER_ID} -g appuser -m appuser
+
 # Change ownership of the working directory
-RUN chown -R www-data:www-data /var/www/html
+RUN chown -R appuser:appuser /var/www/html
