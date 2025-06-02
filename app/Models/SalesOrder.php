@@ -14,12 +14,12 @@ class SalesOrder extends Model
 
     protected $table = 'sales_orders';
 
-    public function customer()
+    public function customers()
     {
         return $this->belongsTo(Customer::class, 'customer_id', 'id');
     }
 
-    public function items()
+    public function salesOrderItems()
     {
         return $this->hasMany(SalesOrderItem::class, 'order_id', 'id');
     }

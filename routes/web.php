@@ -5,3 +5,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::group(['prefix' => 'api'], function () {
+    Route::get('/sales', [App\Http\Controllers\transaksiController::class, 'index'])->name('transaksi.index');
+});

@@ -14,7 +14,7 @@ class SalesOrderItem extends Model
         'order_id'
     ];
 
-    protected $table = 'sales_orders_items';
+    protected $table = 'sales_order_items';
 
     public function product()
     {
@@ -23,6 +23,6 @@ class SalesOrderItem extends Model
 
     public function salesOrder()
     {
-        return $this->hasMany(SalesOrder::class, 'order_id', 'id');
+        return $this->belongsTo(SalesOrder::class, 'order_id', 'id');
     }
 }
