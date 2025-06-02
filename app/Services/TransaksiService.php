@@ -25,7 +25,6 @@ class TransaksiService
         $salesRequest = $request->has('sales') ? $request->input('sales') : null;
 
         try {
-            // Use query builder with joins instead of eager loading the whole dataset
             $transactions =  $this->salesRepository->getLastThreeYears(
                 Carbon::now()->subYears(3),
                 $customerRequest,
@@ -44,7 +43,6 @@ class TransaksiService
                 foreach ($months as $index => $month) {
                     $monthNumber = $index + 1;
                     
-                    // Find the corresponding transaction data
                     $monthData = $transactions->first(function($item) use ($year, $monthNumber) {
                         return $item->year == $year && $item->month == $monthNumber;
                     });
@@ -71,4 +69,64 @@ class TransaksiService
             ], 500);
         }
     }
+
+
+    public function getTransactionCurrentMonth(Request $request)
+    {
+        $year = $request->has('year') ? $request->input('year') : null;
+        $salesName = $request->has('sales') ? $request->input('sales') : null;
+
+        try {
+            $transactions = $this->salesRepository->getMonthlyTargetAndTransactions($salesName);
+
+            // Format the data for the response
+            $formattedData = [];
+            $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            $category = ['Target', 'Revenue', 'Income'];
+
+            foreach ($category as $cat) {
+                $catData = [
+                    'name' => $cat,
+                    'data' => []
+                ];
+                foreach ($months as $index => $month) {
+                    $monthNumber = $index + 1;
+
+                    $monthData = $transactions->first(function($item) use ($monthNumber) {
+                        return $item->month == $monthNumber;
+                    });
+
+                    if ($cat === 'Target') {
+                        $value = $monthData ? number_format($monthData->target, 2, '.', '') : 0;
+                    } elseif ($cat === 'Revenue') {
+                        $value = $monthData ? number_format($monthData->revenue, 2, '.', '') : 0;
+                    } else { // Income
+                        $value = $monthData ? number_format($monthData->revenue - ($monthData->revenue * 0.1), 2, '.', '') : 0; // Assuming income is revenue minus 10% tax
+                    }
+
+                    $catData['data'][] = [
+                        'x' => $month,
+                        'y' => number_format($value, 2, '.', '')
+                    ];
+                }
+
+                $formattedData[] = $catData;
+            }
+
+            
+            return response()->json([
+                'sales' => $salesName,
+                'year' => $year ? $year : Carbon::now()->year,
+                'items' => $formattedData
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'gagal mendapatkan data: ' . $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ], 500);
+        }
+       
+    }
+
 }

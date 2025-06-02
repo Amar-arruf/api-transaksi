@@ -16,6 +16,11 @@ class transaksiController extends Controller
         return $transaksiService->getThreeYearsTransactions($request);
     }
 
+    public function getTransactionCurrentMonthWithTargetDatas(Request $request, TransaksiService $transaksiService)
+    {
+        return $transaksiService->getTransactionCurrentMonth($request);
+    }
+    
     /**
      * Show the form for creating a new resource.
      */

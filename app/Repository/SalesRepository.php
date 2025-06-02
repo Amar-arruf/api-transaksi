@@ -37,5 +37,32 @@ class SalesRepository
             ->orderBy('year', 'desc')
             ->orderBy('month', 'asc')
             ->get();
+
     }
+
+    public function getMonthlyTargetAndTransactions(?string $salesName = null): Collection
+    {
+        $currentYear = Carbon::now()->year;
+
+        return SalesOrder::query()
+            ->join('sales_order_items', 'sales_orders.id', '=', 'sales_order_items.order_id')
+            ->join('sales', 'sales_orders.sales_id', '=', 'sales.id')
+            ->join('sales_targets', 'sales.id', '=', 'sales_targets.sales_id')
+            ->when($salesName, function ($query) use ($salesName) {
+                return $query
+                    ->join('users', 'sales.user_id', '=', 'users.id')
+                    ->where('users.name', $salesName);
+            })
+            ->whereYear('sales_orders.created_at', $currentYear)
+            ->select(
+                DB::raw('MONTH(sales_orders.created_at) as month'),
+                DB::raw('SUM(sales_targets.amount) as target'),
+                DB::raw('SUM(sales_order_items.quantity * sales_order_items.selling_price) as revenue'),
+                DB::raw('COUNT(DISTINCT sales_orders.id) as total_transactions')
+            )
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+    }
+
 }
