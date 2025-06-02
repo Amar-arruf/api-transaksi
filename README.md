@@ -145,15 +145,22 @@ php artisan make:test TransactionTest
 
 Example test case:
 ```php
-public function test_can_create_transaction()
-{
-    $response = $this->postJson('/api/transactions', [
-        'amount' => 1000,
-        'description' => 'Test transaction'
-    ]);
+test('create method calls customer service create with request', function () {
+    // Arrange
+    $request = new Request();
+    $mockCustomerService = Mockery::mock(CustomerService::class);
+    $mockCustomerService->shouldReceive('create')
+        ->once()
+        ->with($request)
+        ->andReturn(['success' => true]);
 
-    $response->assertStatus(201);
-}
+    // Act
+    $controller = new CustomerController();
+    $response = $controller->create($request, $mockCustomerService);
+
+    // Assert
+    expect($response)->toBe(['success' => true]);
+});
 ```
 
 ## License
