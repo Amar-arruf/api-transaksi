@@ -31,14 +31,29 @@ class CustomerService
 
             $data = $validator->validated();
 
-            $customer = $this->repository->create($data);
+            // validation phone number with app.abstractapi.com
+            $phone = $data['phone'];
+            $apiKey = env('ABSTRACT_API_KEY', ''); 
+            $url = "https://phonevalidation.abstractapi.com/v1/?api_key={$apiKey}&phone={$phone}";
 
+            $client = new \GuzzleHttp\Client();
+            $response = $client->request('GET', $url);
+
+           $validationPhone = json_decode($response->getBody(), true);
+        
+
+            if (isset($validationPhone['valid'])  && !$validationPhone['valid']) {
+                return response()->json(['error' => 'Invalid phone number'], 422);
+            }
+
+
+
+            $customer = $this->repository->create($data);
             return response()->json($customer, 201);
         
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
-       
     }
 
     public function update($id, Request $request)
@@ -56,6 +71,20 @@ class CustomerService
             }
 
             $data = $validator->validated();
+            // validation phone number with app.abstractapi.com
+            $phone = $data['phone'];
+            $apiKey = env('ABSTRACT_API_KEY', ''); 
+            $url = "https://phonevalidation.abstractapi.com/v1/?api_key={$apiKey}&phone={$phone}";
+
+            $client = new \GuzzleHttp\Client();
+            $response = $client->request('GET', $url);
+            $validationPhone = json_decode($response->getBody(), true);
+        
+
+            if (isset($validationPhone['valid'])  && !$validationPhone['valid']) {
+                return response()->json(['error' => 'Invalid phone number'], 422);
+            }
+
             $customer = $this->repository->update( (int) $id, $data);
             return response()->json($customer, 200);
         }
