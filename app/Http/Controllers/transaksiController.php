@@ -20,6 +20,11 @@ class transaksiController extends Controller
     {
         return $transaksiService->getTransactionCurrentMonth($request);
     }
+
+    public function getTransactionCurrentMonthWithTarget(Request $request, TransaksiService $transaksiService)
+    {
+        return $transaksiService->getTransactionCurrentMonthWithTarget($request);
+    }
     
     /**
      * Show the form for creating a new resource.

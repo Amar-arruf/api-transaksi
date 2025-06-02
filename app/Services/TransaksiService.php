@@ -129,4 +129,54 @@ class TransaksiService
        
     }
 
+    public function getTransactionCurrentMonthWithTarget(Request $request)
+    {
+        $month = $request->has('month') ? $request->input('month') : null;
+        $isUnderPerform = $request->has('is_underperform') ? $request->input('is_underperform') : null;
+
+        try {
+            $transactions = $this->salesRepository->getSSalesWithTargetOneMonth($month, $isUnderPerform);
+            
+            $formattedItems = $transactions->map(function ($item) {
+            $revenue = floatval($item->revenue);
+            $target = floatval($item->target);
+            $percentage = $target > 0 ? ($revenue / $target * 100) : 0;
+
+            // Format abbreviation
+            $revenueAbbr = $revenue >= 1000000000 
+                ? number_format($revenue / 1000000000, 2) . 'B'
+                : number_format($revenue / 1000000, 2) . 'M';
+
+            $targetAbbr = $target >= 1000000000
+                ? number_format($target / 1000000000, 2) . 'B'
+                : number_format($target / 1000000, 2) . 'M';
+
+            return [
+                'sales' => $item->sales,
+                'revenue' => [
+                'amount' => number_format($revenue, 2, '.', ''),
+                'abbreviation' => $revenueAbbr
+                ],
+                'target' => [
+                'amount' => number_format($target, 2, '.', ''),
+                'abbreviation' => $targetAbbr
+                ],
+                'percentage' => number_format($percentage, 2)
+            ];
+            });
+
+            return response()->json([
+                'is_underperform' => $isUnderPerform,
+                'month' => $month ? $month : Carbon::now()->locale('id')->translatedFormat('F Y'),
+                'items' => $formattedItems
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'gagal mendapatkan data: ' . $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ], 500);
+        }
+    }
+
 }

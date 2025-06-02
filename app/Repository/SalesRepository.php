@@ -66,4 +66,46 @@ class SalesRepository
             ->get();
     }
 
+    public function getSSalesWithTargetOneMonth(?string $month = null, ?string $isUnderPerform = null): Collection
+    {
+        $query = SalesOrder::query()
+            ->join('sales_order_items', 'sales_orders.id', '=', 'sales_order_items.order_id')
+            ->join('sales', 'sales_orders.sales_id', '=', 'sales.id')
+            ->join('users', 'sales.user_id', '=', 'users.id')
+            ->join('sales_targets', 'sales.id', '=', 'sales_targets.sales_id')
+            ->select(
+                'users.name as sales',
+                DB::raw('SUM(sales_order_items.quantity * sales_order_items.selling_price) as revenue'),
+                DB::raw('SUM(sales_targets.amount) as target'),
+                DB::raw('(SUM(sales_order_items.quantity * sales_order_items.selling_price) / SUM(sales_targets.amount) * 100) as percentage')
+            );
+
+        if ($month) {
+          
+            // parse month from Indonesian to English
+            $date = Carbon::createFromLocaleFormat('F Y', 'id', $month);
+
+            $query->whereYear('sales_orders.created_at', $date->year)
+                ->whereMonth('sales_orders.created_at', $date->month);
+        } else {
+            $query->whereYear('sales_orders.created_at', Carbon::now()->year)
+                ->whereMonth('sales_orders.created_at', Carbon::now()->month);
+        }
+
+
+        $result = $query->groupBy('users.name')
+            ->orderBy('users.name')
+            ->having(DB::raw('SUM(sales_order_items.quantity * sales_order_items.selling_price)'), '>', 0);
+
+        if ($isUnderPerform !== null) {
+            $operator = $isUnderPerform == 'true' ? '<' : '>=';
+            $result->having(
+                DB::raw('SUM(sales_order_items.quantity * sales_order_items.selling_price)'),
+                $operator,
+                DB::raw('SUM(sales_targets.amount)')
+            );
+        }
+
+        return $result->get();
+    }
 }
