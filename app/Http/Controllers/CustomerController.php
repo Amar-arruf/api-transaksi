@@ -20,14 +20,14 @@ class CustomerController extends Controller
         return $customerService->update($id, $request);
     }
 
-    public function delete(int $id, CustomerService $customerService)
+    public function delete($id, CustomerService $customerService)
     {
-        return $customerService->delete($id);
+        return $customerService->delete((int)$id);
     }
 
-    public function findById(int $id, CustomerService $customerService)
+    public function findById($id, CustomerService $customerService)
     {
-        return $customerService->findById($id);
+        return $customerService->findById((int)$id);
     }
 
     public function all(CustomerService $customerService)

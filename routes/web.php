@@ -18,4 +18,10 @@ Route::group(['prefix' => 'api'], function () {
         ->name('customer.create')->withoutMiddleware(VerifyCsrfToken::class);
     Route::put('/customer/{id}', [App\Http\Controllers\CustomerController::class, 'update'])
         ->name('customer.update')->withoutMiddleware(VerifyCsrfToken::class);
+
+
+    Route::post('/sales-order', [App\Http\Controllers\SalesOrderController::class, 'create'])
+        ->name('sales-order.create')->withoutMiddleware(VerifyCsrfToken::class);
+    Route::post('/sales-order-item', [App\Http\Controllers\SalesOrderItemController::class, 'create'])
+        ->name('sales-order-item.create')->withoutMiddleware(VerifyCsrfToken::class);
 });

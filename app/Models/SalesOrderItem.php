@@ -6,10 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class SalesOrderItem extends Model
 {
+    public $timestamps = false; 
+    
     protected $fillable = [
         'quantity',
         'product_id',
-        'product_price',
+        'production_price',
         'selling_price',
         'order_id'
     ];
