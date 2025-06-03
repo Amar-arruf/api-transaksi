@@ -6,6 +6,7 @@
 - PHP 8.2 or higher
 - Composer
 - MySQL/MariaDB
+- Docker / Docker-compose
 - Git
 
 ### Installation Steps
