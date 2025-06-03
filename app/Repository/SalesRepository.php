@@ -10,11 +10,18 @@ use Illuminate\Support\Facades\DB;
 
 class SalesRepository
 {
+    protected $salesOrder;
+
+    public function __construct( SalesOrder $salesOrder)
+    {
+        $this->salesOrder = $salesOrder;
+    }
+
     public function getLastThreeYears(Carbon $fromDate, ?string $customerName = null, ?string $salesName = null): Collection
     {
         $threeYearsAgo = $fromDate->subYears(3);
 
-        return SalesOrder::query()
+        return  $this->salesOrder->query()
             ->join('sales_order_items', 'sales_orders.id', '=', 'sales_order_items.order_id')
             ->when($customerName, function ($query) use ($customerName) {
                 return $query
@@ -44,7 +51,7 @@ class SalesRepository
     {
         $currentYear = Carbon::now()->year;
 
-        return SalesOrder::query()
+        return $this->salesOrder->query()
             ->join('sales_order_items', 'sales_orders.id', '=', 'sales_order_items.order_id')
             ->join('sales', 'sales_orders.sales_id', '=', 'sales.id')
             ->join('sales_targets', 'sales.id', '=', 'sales_targets.sales_id')
@@ -68,7 +75,7 @@ class SalesRepository
 
     public function getSSalesWithTargetOneMonth(?string $month = null, ?string $isUnderPerform = null): Collection
     {
-        $query = SalesOrder::query()
+        $query = $this->salesOrder->query()
             ->join('sales_order_items', 'sales_orders.id', '=', 'sales_order_items.order_id')
             ->join('sales', 'sales_orders.sales_id', '=', 'sales.id')
             ->join('users', 'sales.user_id', '=', 'users.id')
